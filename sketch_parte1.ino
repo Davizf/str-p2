@@ -9,10 +9,10 @@ int buttonPin = 7;
 //  global variables
 int muteOn = 0; // 0 ->off & 1 -> on
 unsigned long timeOrig;
+int bitwise = 1;
 
 void play_bit()
 {
-  static int bitwise = 1;
   static unsigned char data = 0;
 
 
