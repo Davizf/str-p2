@@ -38,16 +38,15 @@ void check_button(){
      muteOn = 1 - muteOn;
   }
   button_old_value = new_val;
-}
-
-
-void check_led(){
+  
   if(muteOn){
     digitalWrite(ledPin, HIGH);
   }else{
     digitalWrite(ledPin, LOW);
   }
 }
+
+
 
 void setup ()
 {
@@ -63,7 +62,6 @@ void loop ()
     unsigned long timeDiff;
     play_bit();
     check_button();
-    check_led();
     timeDiff = SAMPLE_TIME - (micros() - timeOrig);
     timeOrig = timeOrig + SAMPLE_TIME;
     delayMicroseconds(timeDiff);
