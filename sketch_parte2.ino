@@ -9,6 +9,7 @@ int buttonPin = 7;
 
 
 //  global variables
+int button_old_value;
 int muteOn = 0; // 0 ->off & 1 -> on
 unsigned long timeOrig;
 
@@ -26,8 +27,16 @@ void play_bit()
 }
 
 void check_button(){
-  if(digitalRead(buttonPin)){
-    muteOn = 1 - muteOn;
+   int new_val = digitalRead(buttonPin);
+  if(button_old_value == 0 && new_val == 1 ){
+     muteOn = 1 - muteOn;
+  }
+  button_old_value = new_val;
+  
+  if(muteOn){
+    digitalWrite(ledPin, HIGH);
+  }else{
+    digitalWrite(ledPin, LOW);
   }
 }
 
@@ -56,7 +65,6 @@ void loop ()
     unsigned long timeDiff;
     play_bit();
     check_button();
-    check_led();
     timeDiff = SAMPLE_TIME - (micros() - timeOrig);
     timeOrig = timeOrig + SAMPLE_TIME;
     delayMicroseconds(timeDiff);
