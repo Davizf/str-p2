@@ -21,8 +21,7 @@ void play_bit()
   if(muteOn){
     OCR2A = 0;
   }else{
-    int compValue=CLOCK_SYSTEM/(prescaled * data);
-    OCR2A = compValue;
+    OCR2A = data;
   }
 }
 
@@ -48,8 +47,8 @@ void setup ()
     pinMode(buttonPin, INPUT);
     Serial.begin(115200);
     timeOrig = micros();
-    TCCR2A = _BV(COM2A1) | _BV(WGM20) | _BV(CS20);
-
+    TCCR2A = _BV(COM2A1) | _BV(WGM20) | _BV(WGM21);
+    TCCR2B = _BV(CS20);
 }
 
 void loop ()
