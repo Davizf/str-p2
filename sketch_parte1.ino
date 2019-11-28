@@ -1,5 +1,6 @@
 #define SAMPLE_TIME 250
-
+long CLOCK_SYSTEM = 16000000;
+long prescaled = 1;
 //  pin
 int soundPin = 11;
 int ledPin = 13;
@@ -54,8 +55,11 @@ void setup ()
     pinMode(ledPin, OUTPUT);
     pinMode(buttonPin, INPUT);
     
-    
+    // not sure 
+    TCCR2A = _BV(COM2A1) | _BV(WGM20) | _BV(WGM21);
+    TCCR2B = _BV(CS20);
     TIMSK2 = _BV(OCIE2A);
+    OCR2A = CLOCK_SYSTEM/(prescaled * 512000);
     
     Serial.begin(115200);
     timeOrig = micros();
