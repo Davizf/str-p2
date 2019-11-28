@@ -13,7 +13,7 @@ int button_old_value;
 int muteOn = 0; // 0 ->off & 1 -> on
 unsigned long timeOrig;
 
-void play_bit()
+ISR(TIMER1_COMPA_vect)
 {
   static unsigned char data = 0;
   if (Serial.available()>1) {
@@ -27,7 +27,7 @@ void play_bit()
 }
 
 void check_button(){
-   int new_val = digitalRead(buttonPin);
+  int new_val = digitalRead(buttonPin);
   if(button_old_value == 0 && new_val == 1 ){
      muteOn = 1 - muteOn;
   }
@@ -40,30 +40,31 @@ void check_button(){
   }
 }
 
-
-void check_led(){
-  if(muteOn){
-    digitalWrite(ledPin, HIGH);
-  }else{
-    digitalWrite(ledPin, LOW);
-  }
-}
-
 void setup ()
 {
     pinMode(soundPin, OUTPUT);
     pinMode(ledPin, OUTPUT);
     pinMode(buttonPin, INPUT);
-    Serial.begin(115200);
-    timeOrig = micros();
+    
     TCCR2A = _BV(COM2A1) | _BV(WGM20) | _BV(WGM21);
     TCCR2B = _BV(CS20);
+    
+    // timer 1 for interruption
+    // does not work, something goes wrong
+    TCCR1A = _BV(COM1A1) | _BV(WGM10) | _BV(WGM11);
+    TCCR1B= _BV(CS10);
+    
+    TIMSK1= _BV(OCIE1A);
+    OCR1A = CLOCK_SYSTEM/(prescaled * 4 * 512000);
+    
+    
+    Serial.begin(115200);
+    timeOrig = micros();
 }
 
 void loop ()
 {
     unsigned long timeDiff;
-    play_bit();
     check_button();
     timeDiff = SAMPLE_TIME - (micros() - timeOrig);
     timeOrig = timeOrig + SAMPLE_TIME;
