@@ -56,8 +56,10 @@ void setup ()
     pinMode(buttonPin, INPUT);
     
     // not sure 
+    // it's ok if we use timer 2 for interruption?
     TCCR2A = _BV(COM2A1) | _BV(WGM20) | _BV(WGM21);
     TCCR2B = _BV(CS20);
+    
     TIMSK2 = _BV(OCIE2A);
     OCR2A = CLOCK_SYSTEM/(prescaled * 512000);
     
