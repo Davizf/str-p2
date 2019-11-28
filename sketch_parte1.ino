@@ -11,7 +11,7 @@ int button_old_value;
 int muteOn = 0; // 0 ->off & 1 -> on
 unsigned long timeOrig;
 
-void play_bit()
+ISR(TIMER2_COMPA_vect)
 {
   static int bitwise = 1;
   static unsigned char data = 0;
@@ -53,6 +53,10 @@ void setup ()
     pinMode(soundPin, OUTPUT);
     pinMode(ledPin, OUTPUT);
     pinMode(buttonPin, INPUT);
+    
+    
+    TIMSK2 = _BV(OCIE2A);
+    
     Serial.begin(115200);
     timeOrig = micros();
 }
@@ -60,7 +64,6 @@ void setup ()
 void loop ()
 {
     unsigned long timeDiff;
-    play_bit();
     check_button();
     timeDiff = SAMPLE_TIME - (micros() - timeOrig);
     timeOrig = timeOrig + SAMPLE_TIME;
