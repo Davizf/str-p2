@@ -12,7 +12,7 @@ int button_old_value;
 int muteOn = 0; // 0 ->off & 1 -> on
 unsigned long timeOrig;
 
-ISR(TIMER2_COMPA_vect)
+ISR(TIMER1_COMPA_vect)
 {
   static int bitwise = 1;
   static unsigned char data = 0;
@@ -54,14 +54,12 @@ void setup ()
     pinMode(soundPin, OUTPUT);
     pinMode(ledPin, OUTPUT);
     pinMode(buttonPin, INPUT);
-    
-    // not sure 
-    // it's ok if we use timer 2 for interruption?
-    TCCR2A = _BV(COM2A1) | _BV(WGM20) | _BV(WGM21);
-    TCCR2B = _BV(CS20);
-    
-    TIMSK2 = _BV(OCIE2A);
-    OCR2A = CLOCK_SYSTEM/(prescaled * 512000);
+
+    TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM10);
+    TCCR1B = _BV(WGM12) | _BV(CS10);
+
+    TIMSK1= _BV(OCIE1A);
+    OCR1A = CLOCK_SYSTEM/(prescaled * 512000);
     
     Serial.begin(115200);
     timeOrig = micros();
