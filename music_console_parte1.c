@@ -17,9 +17,7 @@
 #include <sys/select.h>
 #include <sioLib.h>
 #include <sched.h>
-// Uncomment to test on the Arduino with the serial module
 #include "serialcallLib.h"
-// Uncomment to test on the PC
 #include "audiocallLib.h"
 
 /**********************************************************
@@ -31,17 +29,6 @@
 
 // Path of audio file in windows
 #define FILE_NAME "host:/c/Users/str/Desktop/practica_2_2020-v1/let_it_be_1bit.raw"
-
-// Uncomment to test on the Arduino
-//#define PERIOD_TASK_SEC	0			/* Period of Task   */
-//Dividir el periodo entre 8 para aumentar la frecuencia
-//#define PERIOD_TASK_NSEC  512000000	/* Period of Task   */
-//#define SEND_SIZE 256    /* BYTES */
-
-// Uncomment to test on the PC
-#define PERIOD_TASK_SEC	1			/* Period of Task   */
-#define PERIOD_TASK_NSEC  0	/* Period of Task   */
-#define SEND_SIZE 500    /* BYTES */
 
 #define ON 1
 #define OFF 0
@@ -316,63 +303,4 @@ int main()
 	pthread_join(thread_3, NULL);
 
 	return;
-}
-
-int maina()
-{
-	struct timespec start,end,diff,cycle;
-	char buf[SEND_SIZE];
-	int fd_file = -1;
-	int fd_serie = -1;
-	int ret = 0;
-
-	// Uncomment to test on the Arduino
-	//fd_serie = initSerialMod_WIN_115200 ();
-
-	// Uncomment to test on the PC
-	iniciarAudio_Windows ();
-
-	/* Open music file */
-	printf("open file %s begin\n",FILE_NAME);
-	fd_file = open (FILE_NAME, O_RDONLY, 0644);
-	if (fd_file < 0) {
-		printf("open: error opening file\n");
-		return -1;
-	}
-
-	// loading cycle time
-	cycle.tv_sec=PERIOD_TASK_SEC;
-	cycle.tv_nsec=PERIOD_TASK_NSEC;
-
-	clock_gettime(CLOCK_REALTIME,&start);
-	while (1) {
-
-		// read from music file
-		ret=read(fd_file,buf,SEND_SIZE);
-		if (ret < 0) {
-			printf("read: error reading file\n");
-			return NULL;
-		}
-
-		// write to serial port  		
-		// Uncomment to test on the Arduino
-		//ret = writeSerialMod_256 (buf);
-
-		// Uncomment to test on the PC
-		ret = reproducir_1bit_4000 (buf);
-		if (ret < 0) {
-			printf("write: error writting serial\n");
-			return NULL;
-		}
-
-		clock_gettime(CLOCK_REALTIME,&end);
-		diffTime(end,start,&diff);
-		if (0 >= compTime(cycle,diff)) {
-			printf("ERROR: lasted long than the cycle\n");
-			return NULL;
-		}
-		diffTime(cycle,diff,&diff);
-		nanosleep(&diff,NULL);   
-		addTime(start,cycle,&start);
-	}
 }
