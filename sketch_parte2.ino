@@ -49,13 +49,11 @@ void setup ()
     TCCR2A = _BV(COM2A1) | _BV(WGM20) | _BV(WGM21);
     TCCR2B = _BV(CS20);
     
-    // timer 1 for interruption
-    // does not work, something goes wrong
-    TCCR1A = _BV(COM1A1) | _BV(WGM10) | _BV(WGM11);
-    TCCR1B= _BV(CS10);
+    TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM10);
+    TCCR1B = _BV(WGM12) | _BV(CS10);
     
     TIMSK1= _BV(OCIE1A);
-    OCR1A = CLOCK_SYSTEM/(prescaled * 4 * 512000);
+    OCR1A = CLOCK_SYSTEM/(prescaled  * 512000);
     
     
     Serial.begin(115200);
