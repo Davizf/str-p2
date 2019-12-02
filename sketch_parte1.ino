@@ -24,6 +24,8 @@ ISR(TIMER1_COMPA_vect)
            data = Serial.read();
         }
     }
+    
+    // falta cerrojo y ¿interrupt?
     if(muteOn){
       digitalWrite(soundPin, 0);
     }else{
@@ -55,11 +57,11 @@ void setup ()
     pinMode(ledPin, OUTPUT);
     pinMode(buttonPin, INPUT);
 
-    TCCR1A = _BV(COM1A1) | _BV(COM1B1) | _BV(WGM10);
-    TCCR1B = _BV(WGM12) | _BV(CS10);
-
-    TIMSK1= _BV(OCIE1A);
-    OCR1A = CLOCK_SYSTEM/(prescaled * 512000);
+    TCCR1A =  0; 
+    TCCR1B = _BV(WGM12) | _BV(CS10);  // CTC Mode & prescaled 1
+    TIMSK1= _BV(OCIE1A); 
+    // CLOCK_SYSTEM / ( prescaled * (1 second / 250 us ))
+    OCR1A = CLOCK_SYSTEM / (prescaled * ( 1000000 / 250) );
     
     Serial.begin(115200);
     timeOrig = micros();
