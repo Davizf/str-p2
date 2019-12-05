@@ -1,6 +1,7 @@
 #define SAMPLE_TIME 250
 long CLOCK_SYSTEM = 16000000;
 long prescaled = 1;
+
 //  pin
 int soundPin = 11;
 int ledPin = 13;
@@ -25,24 +26,36 @@ ISR(TIMER1_COMPA_vect)
         }
     }
     
-    // falta cerrojo y ¿interrupt?
-    if(muteOn){
+    noInterrupts();
+    int localMuteOn = muteOn;
+    interrupts();
+    
+    if(localMuteOn){
       digitalWrite(soundPin, 0);
     }else{
       digitalWrite(soundPin, (data & bitwise) );
     }
 
     bitwise = (bitwise * 2);
+
 }
 
 void check_button(){
   int new_val = digitalRead(buttonPin);
   if(button_old_value == 0 && new_val == 1 ){
-     muteOn = 1 - muteOn;
+    
+    noInterrupts();
+    muteOn = 1 - muteOn;
+    interrupts();
+    
   }
   button_old_value = new_val;
-  
-  if(muteOn){
+
+   noInterrupts();
+   int localMuteOn = muteOn;
+   interrupts();
+    
+  if(localMuteOn){
     digitalWrite(ledPin, HIGH);
   }else{
     digitalWrite(ledPin, LOW);
