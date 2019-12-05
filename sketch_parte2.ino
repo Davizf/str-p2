@@ -19,7 +19,13 @@ ISR(TIMER1_COMPA_vect)
   if (Serial.available()>1) {
     data = Serial.read();
   }
-  if(muteOn){
+
+   noInterrupts();
+   int localMuteOn = muteOn;
+   interrupts();
+
+    
+  if(localMuteOn){
     OCR2A = 0;
   }else{
     OCR2A = data;
@@ -29,11 +35,19 @@ ISR(TIMER1_COMPA_vect)
 void check_button(){
   int new_val = digitalRead(buttonPin);
   if(button_old_value == 0 && new_val == 1 ){
-     muteOn = 1 - muteOn;
+    
+    noInterrupts();
+    muteOn = 1 - muteOn;
+    interrupts();
+    
   }
   button_old_value = new_val;
+
+  noInterrupts();
+   int localMuteOn = muteOn;
+   interrupts();
   
-  if(muteOn){
+  if(localMuteOn){
     digitalWrite(ledPin, HIGH);
   }else{
     digitalWrite(ledPin, LOW);
