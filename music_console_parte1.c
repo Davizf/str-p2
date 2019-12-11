@@ -141,7 +141,8 @@ void *task_send(void *p) {
 		pthread_mutex_unlock(&mutex);
 
 		// Send 0's if OFF
-		bzero(buf, sizeof(buf));
+		//bzero(buf, sizeof(buf));
+		for (int i=0; i<send_size; i++) buf[i]=0;
 
 		if (actual_state == ON) {
 			ret=read(fd_file, buf, send_size);
@@ -185,7 +186,8 @@ void *task_resume_stop(void *p) {
 
 	clock_gettime(CLOCK_REALTIME, &start);
 	while (1) {
-		bzero(buffer, buffer_size);
+		//bzero(buffer, buffer_size);
+		for (int i=0; i<buffer_size; i++) buffer[i]=0;
 		read_key=unblockRead(0, buffer, buffer_size);
 		if (read_key > 0) {
 			if (buffer[0] == '0' && state != OFF)
