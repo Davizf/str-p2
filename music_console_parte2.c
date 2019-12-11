@@ -17,13 +17,16 @@
 #include <sys/select.h>
 #include <sioLib.h>
 #include <sched.h>
+// Uncomment to test on the Arduino with the serial module
 #include "serialcallLib.h"
+// Uncomment to test on the PC
 #include "audiocallLib.h"
 
 /**********************************************************
  *  CONSTANTS
  *********************************************************/
 #define SIMULATOR 1// 1 use simulator, 0 use serial
+#define COUNT_TIME 1// 1 use timers for count time, 0 not
 #define NSEC_PER_SEC 1000000000UL
 #define DEV_NAME "/tyCo/1"
 
@@ -130,18 +133,21 @@ int compTime(struct timespec t1,
 }
 
 void *task_send(void *p) {
-	struct timespec start, end, diff;
+	struct timespec start, end, diff, timer_start, timer_end, timer_diff;
 	int actual_state;
 	unsigned char buf[send_size];
 
 	clock_gettime(CLOCK_REALTIME, &start);
 	while (1) {
+		if (COUNT_TIME) clock_gettime(CLOCK_REALTIME, &timer_start);
+
 		pthread_mutex_lock(&mutex);
 		actual_state = state;
 		pthread_mutex_unlock(&mutex);
 
 		// Send 0's if OFF
-		bzero(buf, sizeof(buf));
+		//bzero(buf, sizeof(buf));
+		for (int i=0; i<send_size; i++) buf[i]='0';
 
 		if (actual_state == ON) {
 			ret=read(fd_file, buf, send_size);
@@ -165,9 +171,28 @@ void *task_send(void *p) {
 			printf("ERROR: lasted long than the cycle\n");
 			return NULL;
 		}
+
+		if (COUNT_TIME) {
+			clock_gettime(CLOCK_REALTIME, &timer_end);
+			diffTime(timer_end, timer_start, &timer_diff);
+
+			unsigned long long to_ns=1000000000UL;
+			unsigned long long timer_ns = timer_diff.tv_sec*to_ns + timer_diff.tv_nsec;
+			unsigned long long timer_ms=(unsigned long long)timer_ns/1000;
+
+			/*printf("start: %lld.%.9ld\n", (long long)timer_start.tv_sec, timer_start.tv_nsec);
+			printf("end: %lld.%.9ld\n", (long long)timer_end.tv_sec, timer_end.tv_nsec);
+			printf("diff: %lld.%.9ld\n", (long long)timer_diff.tv_sec, timer_diff.tv_nsec);
+
+			printf("to_ns=%llu\n", to_ns);
+			printf("ns=%llu\n", (unsigned long long)(timer_diff.tv_sec*to_ns));*/
+
+			printf("---------Time task_send is: %llu ns, %llu ms\n", timer_ns, timer_ms);
+		}
+
 		diffTime(cycle_1, diff, &diff);
 		nanosleep(&diff, NULL);
-		addTime(start, cycle_1, &start); 
+		addTime(start, cycle_1, &start);
 	}
 }
 
@@ -179,13 +204,17 @@ void changeState(int new_status) {
 }
 
 void *task_resume_stop(void *p) {
-	struct timespec start, end, diff;
+	struct timespec start, end, diff, timer_start, timer_end, timer_diff;
 	int read_key, buffer_size=3;
 	char buffer[3];// character and \n
 
 	clock_gettime(CLOCK_REALTIME, &start);
 	while (1) {
-		bzero(buffer, buffer_size);
+		if (COUNT_TIME) clock_gettime(CLOCK_REALTIME, &timer_start);
+
+		//bzero(buffer, buffer_size);
+		for (int i=0; i<buffer_size; i++) buffer[i]='0';
+
 		read_key=unblockRead(0, buffer, buffer_size);
 		if (read_key > 0) {
 			if (buffer[0] == '0' && state != OFF)
@@ -200,17 +229,38 @@ void *task_resume_stop(void *p) {
 			printf("ERROR: lasted long than the cycle\n");
 			return NULL;
 		}
+
+		if (COUNT_TIME) {
+			clock_gettime(CLOCK_REALTIME, &timer_end);
+			diffTime(timer_end, timer_start, &timer_diff);
+
+			unsigned long long to_ns=1000000000UL;
+			unsigned long long timer_ns = timer_diff.tv_sec*to_ns + timer_diff.tv_nsec;
+			unsigned long long timer_ms=(unsigned long long)timer_ns/1000;
+
+			/*printf("start: %lld.%.9ld\n", (long long)timer_start.tv_sec, timer_start.tv_nsec);
+			printf("end: %lld.%.9ld\n", (long long)timer_end.tv_sec, timer_end.tv_nsec);
+			printf("diff: %lld.%.9ld\n", (long long)timer_diff.tv_sec, timer_diff.tv_nsec);
+
+			printf("to_ns=%llu\n", to_ns);
+			printf("ns=%llu\n", (unsigned long long)(timer_diff.tv_sec*to_ns));*/
+
+			printf("---------Time task_resume_stop is: %llu ns, %llu ms\n", timer_ns, timer_ms);
+		}
+
 		diffTime(cycle_2, diff, &diff);
 		nanosleep(&diff, NULL);
-		addTime(start, cycle_2, &start);  
+		addTime(start, cycle_2, &start);
 	}
 }
 
 void *task_state(void *p) {
-	struct timespec start, end, diff;
+	struct timespec start, end, diff, timer_start, timer_end, timer_diff;
 
 	clock_gettime(CLOCK_REALTIME, &start);
 	while (1) {
+		if (COUNT_TIME) clock_gettime(CLOCK_REALTIME, &timer_start);
+
 		pthread_mutex_lock(&mutex);
 		if (state == ON) printf("Reproduccion en marcha\n");
 		else printf("Reproduccion en pausa\n");
@@ -223,6 +273,25 @@ void *task_state(void *p) {
 			printf("ERROR: lasted long than the cycle\n");
 			return NULL;
 		}
+
+		if (COUNT_TIME) {
+			clock_gettime(CLOCK_REALTIME, &timer_end);
+			diffTime(timer_end, timer_start, &timer_diff);
+
+			unsigned long long to_ns=1000000000UL;
+			unsigned long long timer_ns = timer_diff.tv_sec*to_ns + timer_diff.tv_nsec;
+			unsigned long long timer_ms=(unsigned long long)timer_ns/1000;
+
+			/*printf("start: %lld.%.9ld\n", (long long)timer_start.tv_sec, timer_start.tv_nsec);
+			printf("end: %lld.%.9ld\n", (long long)timer_end.tv_sec, timer_end.tv_nsec);
+			printf("diff: %lld.%.9ld\n", (long long)timer_diff.tv_sec, timer_diff.tv_nsec);
+
+			printf("to_ns=%llu\n", to_ns);
+			printf("ns=%llu\n", (unsigned long long)(timer_diff.tv_sec*to_ns));*/
+
+			printf("---------Time task_state is: %llu ns, %llu ms\n", timer_ns, timer_ms);
+		}
+
 		diffTime(cycle_3, diff, &diff);
 		nanosleep(&diff, NULL);
 		addTime(start, cycle_3, &start);
